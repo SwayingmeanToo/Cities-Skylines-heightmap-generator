@@ -540,7 +540,7 @@ function togglePanel(index) {
 }
 
 function sanatizeMap(map, xOffset, yOffset) {
-    const citiesmapSize = 1081;
+    const citiesmapSize = 2048;
     let sanatizedMap = Create2DArray(citiesmapSize, 0);
 
     let lowestPositve = 100000;
@@ -570,7 +570,7 @@ function sanatizeMap(map, xOffset, yOffset) {
 }
 
 function sanatizeWatermap(map, xOffset, yOffset) {
-    const citiesmapSize = 1081;
+    const citiesmapSize = 2048;
     let watermap = Create2DArray(citiesmapSize, 0);
 
     for (let y = yOffset; y < yOffset + citiesmapSize; y++) {
@@ -604,7 +604,7 @@ function calcMinMaxHeight(map) {
 }
 
 function updateInfopanel() {
-    let rhs = 17.28 / mapSize * 100;
+    let rhs = 1.024 / mapSize * 100;
      
     document.getElementById('rHeightscale').innerHTML = rhs.toFixed(1);
     document.getElementById('lng').innerHTML = grid.lng.toFixed(5);
@@ -651,10 +651,10 @@ function setHeightScale() {
         new Promise((resolve) => {
             getHeightmap(2, resolve);
         }).then(() => {
-            scope.heightScale = Math.min(250, Math.floor((1024 - scope.waterDepth) / (grid.maxHeight - scope.baseLevel) * 100));
+            scope.heightScale = Math.min(250, Math.floor((2048 - scope.waterDepth) / (grid.maxHeight - scope.baseLevel) * 100));
         });
     } else {
-        scope.heightScale = Math.min(250, Math.floor((1024 - scope.waterDepth) / (grid.maxHeight - scope.baseLevel) * 100));
+        scope.heightScale = Math.min(250, Math.floor((2048 - scope.waterDepth) / (grid.maxHeight - scope.baseLevel) * 100));
     }
     saveSettings();
 }
@@ -671,12 +671,12 @@ function getHeightmap(mode = 0, callback) {
     saveSettings(false);
 
     // get the extent of the current map
-    // in heightmap, each pixel is treated as vertex data, and 1081px represents 1080 faces
+    // in heightmap, each pixel is treated as vertex data, and 2048px represents 1080 faces
     // therefore, "1px = 16m" when the map size is 17.28km
-    let extent = getExtent(grid.lng, grid.lat, mapSize / 1080 * 1081);
+    let extent = getExtent(grid.lng, grid.lat, mapSize / 1024 * 2048);
 
     // zoom is 13 in principle
-    let zoom = 13;
+    let zoom = 15;
 
     incPb(pbElement);
     // get a tile that covers the top left and bottom right (for the tile count calculation)
@@ -769,7 +769,7 @@ function getHeightmap(mode = 0, callback) {
             clearInterval(timer);
             let citiesmap, png, canvas, url;
 
-            // heightmap size corresponds to 1081px map size
+            // heightmap size corresponds to 2024px map size
             let heightmap = toHeightmap(tiles, distance);
 
             // heightmap edge to map edge distance
@@ -799,7 +799,7 @@ function getHeightmap(mode = 0, callback) {
                     break;
                 case 1:
                     citiesmap = toCitiesmap(sanatizedMap, watermap);
-                    png = UPNG.encodeLL([citiesmap], 1081, 1081, 1, 0, 16);
+                    png = UPNG.encodeLL([citiesmap], 2048, 2048, 1, 0, 16);
                     download('heightmap.png', png);
                     break;
                 case 2:
@@ -807,7 +807,7 @@ function getHeightmap(mode = 0, callback) {
                     break;
                 case 3:
                     citiesmap = toCitiesmap(sanatizedMap, watermap);
-                    png = UPNG.encodeLL([citiesmap], 1081, 1081, 1, 0, 16);
+                    png = UPNG.encodeLL([citiesmap], 2048, 2048, 1, 0, 16);
                     downloadAsZip(png, 1);
                     break;
                 case 255:
@@ -906,7 +906,7 @@ function autoSettings(withMap = true) {
             getHeightmap(2, resolve);
         }).then(() => {
             scope.baseLevel = grid.minHeight;
-            scope.heightScale = Math.min(250, Math.floor((1024 - scope.waterDepth) / (grid.maxHeight - scope.baseLevel) * 100));            
+            scope.heightScale = Math.min(250, Math.floor((2048 - scope.waterDepth) / (grid.maxHeight - scope.baseLevel) * 100));            
         });
     }
 
@@ -1259,7 +1259,7 @@ function toHeightmap(tiles, distance) {
     let tileNum = tiles.length;
     let srcMap = Create2DArray(tileNum * 512, 0);
 
-    // in heightmap, each pixel is treated as vertex data, and 1081px represents 1080 faces
+    // in heightmap, each pixel is treated as vertex data, and 2048px represents 1080 faces
     // therefore, "1px = 16m" when the map size is 17.28km
     let heightmap = Create2DArray(Math.ceil(1080 * (distance / mapSize)), 0);
     let smSize = srcMap.length;
@@ -1331,7 +1331,7 @@ function toTerrainRGB(heightmap) {
 }
 
 function toCitiesmap(heightmap, watermap) {
-    const citiesmapSize = 1081;
+    const citiesmapSize = 2048;
 
     // cities has L/H byte order
     let citiesmap = new Uint8ClampedArray(2 * citiesmapSize * citiesmapSize);
@@ -1351,7 +1351,7 @@ function toCitiesmap(heightmap, watermap) {
             // raise the land by the amount of water depth
             // a height lower than baselevel is considered to be the below sea level and the height is set to 0
             // water depth is unaffected by height scale
-            // the map is unscaled at this point, so high mountains above 1024 meter can be present
+            // the map is unscaled at this point, so high mountains above 2048 meter can be present
             let calcHeight = (height + Math.round(waterDepth * 10 * watermap[y][x])) / 10;
             workingmap[y][x] = Math.max(0, calcHeight);                       
         }
